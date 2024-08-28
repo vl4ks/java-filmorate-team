@@ -35,7 +35,7 @@ public class FilmController {
             log.error("Описание не может быть больше 200 символов");
             throw new ConditionsNotMetException("Описание не может быть больше 200 символов");
         }
-        if (film.getReleaseDate().isBefore(LocalDate.of(1985, 12, 28)) || film.getReleaseDate().isAfter(LocalDate.now())) {
+        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28)) || film.getReleaseDate().isAfter(LocalDate.now())) {
             log.error("Не корректная дата выхода фильма");
             throw new ConditionsNotMetException("Не корректная дата выхода фильма");
         }
