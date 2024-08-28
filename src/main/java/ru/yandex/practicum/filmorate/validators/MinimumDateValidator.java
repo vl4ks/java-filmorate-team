@@ -11,7 +11,7 @@ public class MinimumDateValidator implements ConstraintValidator<MinimumDate, Lo
 
     @Override
     public void initialize(MinimumDate constraintAnnotation) {
-        minimumDate = LocalDate.parse(constraintAnnotation.value(), DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+        minimumDate = LocalDate.parse(constraintAnnotation.value(), DateTimeFormatter.ofPattern("yyyy.MM.dd"));
     }
 
     @Override

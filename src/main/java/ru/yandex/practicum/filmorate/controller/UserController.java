@@ -84,8 +84,10 @@ public class UserController {
             log.trace("Обновили день рождения пользователя {}", oldUser);
             log.info("Обновленный пользователь c id {}  и email {}", oldUser.getId(), oldUser.getEmail());
             return oldUser;
+        } else {
+            log.error("Пользователь c id {} не найден.", user.getId());
+            throw new NotFoundException("Пользователь не найден");
         }
-        throw new NotFoundException("Пользователь не найден");
     }
 
     // вспомогательный метод для генерации идентификатора нового поста

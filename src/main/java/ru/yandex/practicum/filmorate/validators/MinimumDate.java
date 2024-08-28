@@ -16,5 +16,5 @@ public @interface MinimumDate {
 
     Class<?>[] payload() default {};
 
-    String value() default "28.12.1985";
+    String value() default "1985.12.28";
 }

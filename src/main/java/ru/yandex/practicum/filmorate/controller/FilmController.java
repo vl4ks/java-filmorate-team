@@ -26,7 +26,7 @@ public class FilmController {
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-        log.info("Создание поста");
+        log.info("Создание фильма");
         if (film.getName() == null || film.getName().isBlank()) {
             log.error("Название не может быть пустым");
             throw new ConditionsNotMetException("Название не может быть пустым");
@@ -57,6 +57,10 @@ public class FilmController {
         if (film == null) {
             log.error("Фильм не может быть пустым");
             throw new NotFoundException("Фильм не может быть пустым");
+        }
+        if (film.getId() == 0) {
+            log.error("Id не может быть пустым");
+            throw new NotFoundException("Id не может быть пустым");
         }
         log.info("Обновление поста");
         // проверяем необходимые условия
