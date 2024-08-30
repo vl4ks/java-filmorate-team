@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.model;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -19,17 +20,21 @@ public class Film {
 
     private long id;
 
-    @NotBlank
+    @NotBlank(message = "Название фильма не может быть пустым")
+    @NotNull(message = "Название фильма не может быть не заполнено")
     private String name;
 
-    @Length(max = 200)
+    @NotNull(message = "Описание не может быть пустым")
+    @NotBlank(message = "Описание не может быть пустым")
+    @Length(max = 200, message = "Длина не может быть более 200 символов")
     private String description;
 
-    //    @DateTimeFormat(pattern = "dd.MM.yyyy")
+    @NotNull(message = "Дата должна быть заполнена")
     @PastOrPresent(message = "Дата не может быть в будущем")
     @MinimumDate
     private LocalDate releaseDate;
 
+    @NotNull(message = "Продолжительность фильма должна быть заполнена")
     @Min(1)
     private long duration;
 

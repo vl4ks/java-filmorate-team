@@ -27,25 +27,19 @@ public class UserController {
     @PostMapping
     public User create(@Valid @RequestBody User user) {
         log.info("Создаем нового пользователя");
-        if (user.getEmail().isBlank()) {
-            log.error("Имейл должен быть указан");
-            throw new ConditionsNotMetException("Имейл должен быть указан");
-        }
         if (users.values().stream().anyMatch(u -> u.getEmail().equals(user.getEmail()))) {
             log.error("Этот имейл уже используется - {}", user.getEmail());
-            throw new DuplicatedDataException("Этот имейл уже используется");
+            throw new DuplicatedDataException(String.format("Этот имейл уже используется %s", user.getEmail()));
         }
         user.setId(getNextUserId());
         log.trace("Присвоили пользователю id: {}", user.getId());
-        user.setLogin(user.getLogin());
         log.trace("Присвоили пользователю login: {}", user.getLogin());
         if (user.getName() == null) {
             user.setName(user.getLogin());
         } else {
             user.setName(user.getName());
         }
-        log.info("Присвоили пользователю name: {}", user.getName());
-        user.setBirthday(user.getBirthday());
+        log.trace("Присвоили пользователю name: {}", user.getName());
         log.trace("Присвоили пользователю birthday: {}", user.getBirthday());
         users.put(user.getId(), user);
         log.trace("Пользователь создан: {}", user);
@@ -58,7 +52,7 @@ public class UserController {
         log.info("Обновление пользователя");
         if (user.getId() == 0) {
             log.error("Id при изменении пользователя должен быть указан");
-            throw new ConditionsNotMetException("Id должен быть указан");
+            throw new ConditionsNotMetException("Id при изменении пользователя должен быть указан");
         }
         if (users.containsKey(user.getId())) {
             User oldUser = users.get(user.getId());
