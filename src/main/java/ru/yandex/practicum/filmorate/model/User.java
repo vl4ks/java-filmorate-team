@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 @Data
 @EqualsAndHashCode(exclude = "id")
@@ -30,4 +31,6 @@ public class User {
     @NotNull(message = "Дата рождения должна быть заполнена")
     @Past(message = "Ошибка валидации даты рождения, дата должна быть меньше текущей даты")
     private LocalDate birthday;
+
+    private Set<Long> friends;
 }
