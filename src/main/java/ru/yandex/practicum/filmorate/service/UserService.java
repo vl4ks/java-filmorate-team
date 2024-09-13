@@ -36,12 +36,12 @@ public class UserService {
             log.error("Пользователи в друзьях");
             throw new DuplicatedDataException("Пользователи уже в друзьях");
         }
-        Set<Long> friends1 = userFrom.getFriends();
-        Set<Long> Friends2 = userTo.getFriends();
-        friends1.add(userTo.getId());
-        Friends2.add(userFrom.getId());
-        userFrom.setFriends(friends1);
-        userTo.setFriends(Friends2);
+        Set<Long> friendsFrom = userFrom.getFriends();
+        Set<Long> friendsTo = userTo.getFriends();
+        friendsFrom.add(userTo.getId());
+        friendsTo.add(userFrom.getId());
+        userFrom.setFriends(friendsFrom);
+        userTo.setFriends(friendsTo);
         userStorage.updateUser(userFrom);
         userStorage.updateUser(userTo);
         log.info("Пользователь {} добавлен в друзья к пользовалю {}", userFrom, userTo);
