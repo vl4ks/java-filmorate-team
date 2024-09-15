@@ -16,65 +16,64 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    private InMemoryUserStorage userStorage;
+
     private UserService userService;
 
     @Autowired
     public UserController(InMemoryUserStorage userStorage, UserService userService) {
-        this.userStorage = userStorage;
         this.userService = userService;
     }
 
     @GetMapping
     public Collection<User> findAllUsers() {
-        return userStorage.findAllUsers();
+        return userService.findAllUsers();
     }
 
     @GetMapping("/{id}")
     public User findUser(@PathVariable Long id) {
-        return userStorage.getUserById(id);
+        return userService.getUserById(id);
     }
 
     @GetMapping("/{id}/friends")
     public Collection<User> findUserFriends(@PathVariable Long id) {
-        HashSet<Long> userFriends = (HashSet<Long>) userStorage.getUserById(id).getFriends();
+        HashSet<Long> userFriends = (HashSet<Long>) userService.getUserById(id).getFriends();
         if (userFriends == null) {
             userFriends = new HashSet<>();
-            userStorage.getUserById(id).setFriends(userFriends);
+            userService.getUserById(id).setFriends(userFriends);
         }
         return userFriends.stream()
-                .map(friendId -> userStorage.getUserById(friendId))
+                .map(friendId -> userService.getUserById(friendId))
                 .collect(Collectors.toSet());
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
     public Collection<User> findUserFriends(@PathVariable Long id, @PathVariable Long otherId) {
-        return userService.getMutualFriends(userStorage.getUserById(id), userStorage.getUserById(otherId));
+        return userService.getMutualFriends(userService.getUserById(id), userService.getUserById(otherId));
     }
 
     @PostMapping
     public User create(@Valid @RequestBody User user) {
-        return userStorage.addUser(user);
+        return userService.addUser(user);
     }
 
     @PutMapping
     public User update(@Valid @RequestBody User user) {
-        return userStorage.updateUser(user);
+        return userService.updateUser(user);
     }
 
     @PutMapping("/{id}/friends/{friendId}")
     public User addFriend(@PathVariable Long id, @PathVariable Long friendId) {
-        return userService.addFriend(userStorage.getUserById(id), userStorage.getUserById(friendId));
+        return userService.addFriend(userService.getUserById(id), userService.getUserById(friendId));
     }
 
     @DeleteMapping
     public String delete(@Valid @RequestBody User user) {
-        return userStorage.removeUser(user);
+        return userService.removeUser(user);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
     public User removeFriend(@PathVariable Long id, @PathVariable Long friendId) {
-        return userService.removeFriend(userStorage.getUserById(id), userStorage.getUserById(friendId));
+        return userService.removeFriend(userService.getUserById(id), userService.getUserById(friendId));
     }
 
 }

@@ -34,7 +34,6 @@ public class FilmService {
         }
         log.info("Пользователь {} добавил лайк к фильму {}", user, film);
         film.getLikes().add(user.getId());
-        filmStorage.updateFilm(film);
         return film;
     }
 
@@ -48,7 +47,6 @@ public class FilmService {
         }
         log.info("Пользователь {} удалил лайк к фильму {}", user, film);
         film.getLikes().remove(user.getId());
-        filmStorage.updateFilm(film);
         return film;
     }
 
@@ -59,5 +57,25 @@ public class FilmService {
                 .sorted((f1, f2) -> f2.getLikes().size() - f1.getLikes().size())
                 .limit(limit)
                 .collect(Collectors.toList());
+    }
+
+    public Collection<Film> getAllFilms() {
+        return filmStorage.getAllFilms();
+    }
+
+    public Film getFilmById(long id) {
+        return filmStorage.getFilmById(id);
+    }
+
+    public Film addFilm(Film film) {
+        return filmStorage.addFilm(film);
+    }
+
+    public Film updateFilm(Film film) {
+        return filmStorage.updateFilm(film);
+    }
+
+    public String removeFilm(Film film) {
+        return filmStorage.removeFilm(film);
     }
 }

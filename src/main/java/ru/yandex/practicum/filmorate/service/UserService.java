@@ -42,8 +42,6 @@ public class UserService {
         friendsTo.add(userFrom.getId());
         userFrom.setFriends(friendsFrom);
         userTo.setFriends(friendsTo);
-        userStorage.updateUser(userFrom);
-        userStorage.updateUser(userTo);
         log.info("Пользователь {} добавлен в друзья к пользовалю {}", userFrom, userTo);
 
         return userFrom;
@@ -61,8 +59,6 @@ public class UserService {
         if ((userFrom.getFriends().contains(userTo.getId())) & (userTo.getFriends().contains(userFrom.getId()))) {
             userFrom.getFriends().remove(userTo.getId());
             userTo.getFriends().remove(userFrom.getId());
-            userStorage.updateUser(userFrom);
-            userStorage.updateUser(userTo);
             log.info("Пользователь {} удален из друзей пользователя {}", userFrom, userTo);
             return userFrom;
         } else {
@@ -81,5 +77,25 @@ public class UserService {
         return commonFriends.stream()
                 .map(friendId -> userStorage.getUserById(friendId))
                 .collect(Collectors.toSet());
+    }
+
+    public Collection<User> findAllUsers() {
+        return userStorage.findAllUsers();
+    }
+
+    public User getUserById(long id) {
+        return userStorage.getUserById(id);
+    }
+
+    public User addUser(User user) {
+        return userStorage.addUser(user);
+    }
+
+    public User updateUser(User user) {
+        return userStorage.updateUser(user);
+    }
+
+    public String removeUser(User user) {
+        return userStorage.removeUser(user);
     }
 }
