@@ -1,95 +1,79 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.ConditionsNotMetException;
-import ru.yandex.practicum.filmorate.exceptions.DuplicatedDataException;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(UserController.class);
-    private final Map<Long, User> users = new HashMap<>();
+
+    private UserService userService;
+
+    @Autowired
+    public UserController(InMemoryUserStorage userStorage, UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping
     public Collection<User> findAllUsers() {
-        return users.values();
+        return userService.findAllUsers();
+    }
+
+    @GetMapping("/{id}")
+    public User findUser(@PathVariable Long id) {
+        return userService.getUserById(id);
+    }
+
+    @GetMapping("/{id}/friends")
+    public Collection<User> findUserFriends(@PathVariable Long id) {
+        HashSet<Long> userFriends = (HashSet<Long>) userService.getUserById(id).getFriends();
+        if (userFriends == null) {
+            userFriends = new HashSet<>();
+            userService.getUserById(id).setFriends(userFriends);
+        }
+        return userFriends.stream()
+                .map(friendId -> userService.getUserById(friendId))
+                .collect(Collectors.toSet());
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public Collection<User> findUserFriends(@PathVariable Long id, @PathVariable Long otherId) {
+        return userService.getMutualFriends(userService.getUserById(id), userService.getUserById(otherId));
     }
 
     @PostMapping
     public User create(@Valid @RequestBody User user) {
-        log.info("Создаем нового пользователя");
-        if (users.values().stream().anyMatch(u -> u.getEmail().equals(user.getEmail()))) {
-            log.error("Этот имейл уже используется - {}", user.getEmail());
-            throw new DuplicatedDataException(String.format("Этот имейл уже используется %s", user.getEmail()));
-        }
-        user.setId(getNextUserId());
-        log.trace("Присвоили пользователю id: {}", user.getId());
-        log.trace("Присвоили пользователю login: {}", user.getLogin());
-        if (user.getName() == null) {
-            user.setName(user.getLogin());
-        } else {
-            user.setName(user.getName());
-        }
-        log.trace("Присвоили пользователю name: {}", user.getName());
-        log.trace("Присвоили пользователю birthday: {}", user.getBirthday());
-        users.put(user.getId(), user);
-        log.trace("Пользователь создан: {}", user);
-        log.info("Пользователь c id {}  и email {} - создан", user.getId(), user.getEmail());
-        return user;
+        return userService.addUser(user);
     }
 
     @PutMapping
     public User update(@Valid @RequestBody User user) {
-        log.info("Обновление пользователя");
-        if (user.getId() == 0) {
-            log.error("Id при изменении пользователя должен быть указан");
-            throw new ConditionsNotMetException("Id при изменении пользователя должен быть указан");
-        }
-        if (users.containsKey(user.getId())) {
-            User oldUser = users.get(user.getId());
-            log.trace("Взяли в обновление пользователя {}", oldUser);
-            if (users.values().stream().filter(u -> u.getId() != oldUser.getId()).anyMatch(u -> u.getEmail().equals(user.getEmail()))) {
-                log.error("Этот имейл уже используется - {}", user.getEmail());
-                throw new DuplicatedDataException("Этот имейл уже используется");
-            }
-            oldUser.setEmail(user.getEmail());
-            log.trace("Обновили email пользователя {}", oldUser);
-            if (!user.getName().isBlank()) {
-                oldUser.setName(user.getName());
-                log.trace("Обновили username пользователя {}", oldUser);
-            } else {
-                oldUser.setName(user.getLogin());
-                log.trace("Обновили username пользователя {}", oldUser);
-            }
-            if (user.getLogin() != null) {
-                log.trace("Обновили password пользователя {}", oldUser);
-                oldUser.setLogin(user.getLogin());
-            }
-            oldUser.setBirthday(user.getBirthday());
-            log.trace("Обновили день рождения пользователя {}", oldUser);
-            log.info("Обновленный пользователь c id {}  и email {}", oldUser.getId(), oldUser.getEmail());
-            return oldUser;
-        } else {
-            log.error("Пользователь c id {} не найден.", user.getId());
-            throw new NotFoundException("Пользователь не найден");
-        }
+        return userService.updateUser(user);
     }
 
-    // вспомогательный метод для генерации идентификатора нового поста
-    private long getNextUserId() {
-        long currentMaxId = users.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
+    @PutMapping("/{id}/friends/{friendId}")
+    public User addFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        return userService.addFriend(userService.getUserById(id), userService.getUserById(friendId));
     }
+
+    @DeleteMapping
+    public String delete(@Valid @RequestBody User user) {
+        return userService.removeUser(user);
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public User removeFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        return userService.removeFriend(userService.getUserById(id), userService.getUserById(friendId));
+    }
+
 }

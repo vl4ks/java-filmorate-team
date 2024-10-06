@@ -36,6 +36,13 @@ public class ErrorHandler {
         return new ErrorResponse(String.format("Не найдено: %s", e.getMessage()));
     }
 
+    @ExceptionHandler(NotFoundUserException.class)
+    @ResponseStatus(HttpStatus.OK)
+    public ErrorResponse handleNotFoundException(NotFoundUserException e) {
+        log.error("Не найдено: %s", e.getMessage());
+        return new ErrorResponse(String.format("Не найдено: %s", e.getMessage()));
+    }
+
     @ExceptionHandler(DuplicatedDataException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleDuplicatedDataException(DuplicatedDataException e) {
@@ -47,5 +54,11 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleConditionsNotMetException(ConditionsNotMetException e) {
         return new ErrorResponse(String.format("Условия не выполнены: %s", e.getMessage()));
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleException(Throwable e) {
+        return new ErrorResponse(String.format("Ошибка сервера: %s", e.getMessage()));
     }
 }

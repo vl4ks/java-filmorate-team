@@ -10,6 +10,7 @@ import org.hibernate.validator.constraints.Length;
 import ru.yandex.practicum.filmorate.validators.MinimumDate;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 /**
  * Film.
@@ -37,5 +38,7 @@ public class Film {
     @NotNull(message = "Продолжительность фильма должна быть заполнена")
     @Min(1)
     private long duration;
+
+    private Set<Long> likes;
 
 }
