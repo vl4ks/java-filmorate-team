@@ -12,7 +12,7 @@ import java.util.Collection;
 public class GenreDbStorage implements GenreStorage {
 
     private final JdbcTemplate jdbcTemplate;
-    private final static String GENRE = "select * from genres";
+    private final String GENRE = "select * from genres";
 
     @Override
     public Genre getGenreById(Integer genreId) {
