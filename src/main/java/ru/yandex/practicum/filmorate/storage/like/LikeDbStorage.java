@@ -19,9 +19,10 @@ public class LikeDbStorage implements LikeStorage {
     public void addLike(Long filmId, Long userId) {
 
         final String sql = "insert into film_likes (user_id, film_id) values (?, ?)";
-
+        final String sql2 = "update films set rate = rate + 1 where id = ?";
         try {
             jdbcTemplate.update(sql, userId, filmId);
+            jdbcTemplate.update(sql2, filmId);
             log.info("Пользователь {} добавил лайк на фильм {}", userId, filmId);
         } catch (Exception e) {
             log.error("Ошибка добавления лайка", e);
@@ -31,7 +32,8 @@ public class LikeDbStorage implements LikeStorage {
     @Override
     public boolean removeLike(Long filmId, Long userId) {
         final String sql = "delete from film_likes where  film_id= ? and user_id = ?";
-        return jdbcTemplate.update(sql, filmId, userId) > 0;
+        final String sql2 = "update films set rate = rate - 1 where id = ?";
+        return ((jdbcTemplate.update(sql, filmId, userId) > 0) && (jdbcTemplate.update(sql2, filmId) > 0));
     }
 
     @Override

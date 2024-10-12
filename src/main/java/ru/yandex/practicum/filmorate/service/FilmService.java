@@ -21,7 +21,8 @@ public class FilmService {
 
     public void addLikeToFilm(Film film, User user) {
         likeStorage.addLike(film.getId(), user.getId());
-        filmStorage.updateFilm(film);
+        Film updatedFilm = filmStorage.getFilmByFilmId(film.getId());
+        filmStorage.updateFilm(updatedFilm);
     }
 
     public boolean removeLike(Long filmId, Long userId) {
@@ -30,9 +31,9 @@ public class FilmService {
 
     public Collection<Film> getTopFilmsLimited(int limit) {
         return filmStorage.getAllFilms().stream()
-                .filter(film -> film.getLikes() != null)
-                .filter(film -> !film.getLikes().isEmpty())
-                .sorted((f1, f2) -> f2.getLikes().size() - f1.getLikes().size())
+                .filter(film -> film.getRate() > 0)
+                .filter(film -> film.getLikes().size() > 0)
+                .sorted((f1, f2) -> f2.getRate() - f1.getRate())
                 .limit(limit)
                 .collect(Collectors.toList());
     }
