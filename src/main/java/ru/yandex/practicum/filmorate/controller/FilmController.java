@@ -34,16 +34,21 @@ class FilmController {
         return filmService.getFilmById(id);
     }
 
-    @GetMapping("/popular")
-    public Collection<Film> getTopFilmsLimited(@RequestParam(required = false, defaultValue = "10") String count) {
-        return filmService.getTopFilmsLimited(Integer.parseInt(count));
-    }
+//    @GetMapping("/popular")
+//    public Collection<Film> getTopFilmsLimited(@RequestParam(required = false, defaultValue = "10") String count) {
+//        return filmService.getTopFilmsLimited(Integer.parseInt(count));
+//    }
 
     @GetMapping("/popular?count={limit}&genreId={genreId}&year={year}")
     public Collection<Film> getPopularFilmsByGenreAndYear(@RequestParam(required = false, defaultValue = "10") String limit,
-                                                          @RequestParam int genreId,
-                                                          @RequestParam int year) {
-        return filmService.getPopularFilmsByGenreAndYear(Integer.parseInt(limit), genreId, year);
+                                                          @RequestParam String genreId,
+                                                          @RequestParam String year) {
+        if (genreId == null && year == null){
+            return filmService.getTopFilmsLimited(Integer.parseInt(limit));
+        }else {
+            return filmService.getPopularFilmsByGenreAndYear(Integer.parseInt(limit), Integer.parseInt(genreId), Integer.parseInt(year));
+        }
+
     }
 
 
