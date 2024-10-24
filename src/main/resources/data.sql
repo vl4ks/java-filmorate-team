@@ -69,6 +69,7 @@ primary key (director_id, film_id)
 )
 
 
+
 insert into mpa (name)
 values ('G');
 insert into mpa (name)
