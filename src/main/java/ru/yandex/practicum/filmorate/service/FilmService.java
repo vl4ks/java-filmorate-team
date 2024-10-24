@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.like.LikeDbStorage;
 import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
 
 import java.util.Collection;
