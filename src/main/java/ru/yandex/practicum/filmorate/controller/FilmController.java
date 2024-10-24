@@ -43,7 +43,7 @@ class FilmController {
         try {
             log.info("Start getPopularFilmsByGenreAndYear count {}, genreId {}, year {}", count, genreId, year);
             return filmService.getPopularFilmsByGenreAndYear(Integer.parseInt(count), genreId, year);
-        } catch (Exception e){
+        } catch (Exception e) {
             log.error("Error {} getPopularFilmsByGenreAndYear count {}, genreId {}, year {}", e.getMessage(), count, genreId, year);
             throw e;
         }
