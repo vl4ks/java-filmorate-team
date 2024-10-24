@@ -129,14 +129,14 @@ public class FilmDbStorage implements FilmStorage {
                 "       from film_likes " +
                 "       group by film_id ) as popular on popular.film_id = f.id "
                 ;
-        if(!genreId.isEmpty()) {
+        if (!genreId.isEmpty()) {
             sql = sql + " left join film_genres g on g.film_id = f.id ";
         }
         sql = sql + "where 1=1 ";
-        if(!genreId.isEmpty()){
+        if (!genreId.isEmpty()) {
             sql = sql +  " and g.genre_id = " + Integer.parseInt(genreId);
         }
-        if(!year.isEmpty()){
+        if (!year.isEmpty()) {
             sql = sql + " and extract(year from cast(f.release_date as date)) = " + Integer.parseInt(year);
         }
         sql = sql + " order by likes_count desc " +
