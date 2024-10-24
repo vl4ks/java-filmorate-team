@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -8,6 +9,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
+import java.time.Year;
 import java.util.Collection;
 
 @Slf4j
@@ -34,21 +36,19 @@ class FilmController {
         return filmService.getFilmById(id);
     }
 
-//    @GetMapping("/popular")
-//    public Collection<Film> getTopFilmsLimited(@RequestParam(required = false, defaultValue = "10") String count) {
-//        return filmService.getTopFilmsLimited(Integer.parseInt(count));
-//    }
 
-    @GetMapping("/popular?count={limit}&genreId={genreId}&year={year}")
-    public Collection<Film> getPopularFilmsByGenreAndYear(@RequestParam(required = false, defaultValue = "10") String limit,
-                                                          @RequestParam String genreId,
-                                                          @RequestParam String year) {
-        if (genreId == null && year == null){
-            return filmService.getTopFilmsLimited(Integer.parseInt(limit));
-        }else {
-            return filmService.getPopularFilmsByGenreAndYear(Integer.parseInt(limit), Integer.parseInt(genreId), Integer.parseInt(year));
+
+    @GetMapping("/popular")
+    public Collection<Film> getPopularFilmsByGenreAndYear(@RequestParam(required = false, defaultValue = "10") String count,
+                                                          @RequestParam(required = false, defaultValue = "") String genreId,
+                                                          @RequestParam(required = false, defaultValue = "") String year) {
+        try {
+            log.info("Start getPopularFilmsByGenreAndYear count {}, genreId {}, year {}", count, genreId, year);
+            return filmService.getPopularFilmsByGenreAndYear(Integer.parseInt(count), genreId, year);
+        } catch (Exception e){
+            log.error("Error {} getPopularFilmsByGenreAndYear count {}, genreId {}, year {}", e.getMessage(), count, genreId, year);
+            throw e;
         }
-
     }
 
 

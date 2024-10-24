@@ -28,15 +28,6 @@ public class FilmService {
         return likeStorage.removeLike(filmId, userId);
     }
 
-    public Collection<Film> getTopFilmsLimited(int limit) {
-        return filmStorage.getAllFilms().stream()
-                .filter(film -> film.getRate() > 0)
-                .filter(film -> film.getLikes().size() > 0)
-                .sorted((f1, f2) -> f2.getRate() - f1.getRate())
-                .limit(limit)
-                .collect(Collectors.toList());
-    }
-
     public Collection<Film> getAllFilms() {
         return filmStorage.getAllFilms();
     }
@@ -57,15 +48,9 @@ public class FilmService {
         return filmStorage.removeFilm(film);
     }
 
-    public Collection<Film> getPopularFilmsByGenreAndYear(int count, int genreId, int year) {
-        return filmStorage.getAllFilms().stream()
-                .filter(film -> film.getRate() > 0)
-                .filter(film -> film.getLikes().size() > 0)
-                .filter(film -> film.getGenres().stream().map(Genre::getId).collect(Collectors.toList()).contains(genreId))
-                .filter(film -> film.getReleaseDate().getYear() == year)
-                .sorted((f1, f2) -> f2.getRate() - f1.getRate())
-                .limit(count)
-                .collect(Collectors.toList());
+    public Collection<Film> getPopularFilmsByGenreAndYear(int count, String genreId, String year) {
+        var result = filmStorage.getPopularFilmsByGenreAndYear(count, genreId, year);
+        return result;
     }
 
 }
