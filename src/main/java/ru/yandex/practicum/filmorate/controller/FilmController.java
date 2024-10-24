@@ -39,6 +39,14 @@ class FilmController {
         return filmService.getTopFilmsLimited(Integer.parseInt(count));
     }
 
+    @GetMapping("/films/popular?count={limit}&genreId={genreId}&year={year}")
+    public Collection<Film> getPopularFilmsByGenreAndYear(@RequestParam(required = false, defaultValue = "10") String limit,
+                                                          @RequestParam int genreId,
+                                                          @RequestParam int year) {
+        return filmService.getPopularFilmsByGenreAndYear(Integer.parseInt(limit), genreId, year);
+    }
+
+
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
         return filmService.addFilm(film);

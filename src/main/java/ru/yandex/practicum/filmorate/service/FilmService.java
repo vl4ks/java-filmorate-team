@@ -3,8 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
 
@@ -57,4 +56,16 @@ public class FilmService {
     public String removeFilm(Film film) {
         return filmStorage.removeFilm(film);
     }
+
+    public Collection<Film> getPopularFilmsByGenreAndYear(int count, int genreId, int year) {
+        return filmStorage.getAllFilms().stream()
+                .filter(film -> film.getRate() > 0)
+                .filter(film -> film.getLikes().size() > 0)
+                .filter(film -> film.getGenres().stream().map(Genre::getId).collect(Collectors.toList()).contains(genreId))
+                .filter(film -> film.getReleaseDate().getYear() == year)
+                .sorted((f1, f2) -> f2.getRate() - f1.getRate())
+                .limit(count)
+                .collect(Collectors.toList());
+    }
+
 }
