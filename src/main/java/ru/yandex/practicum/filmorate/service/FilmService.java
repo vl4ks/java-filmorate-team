@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.like.LikeDbStorage;
 import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
 
 import java.util.Collection;
@@ -18,6 +19,7 @@ public class FilmService {
 
     private final FilmStorage filmStorage;
     private final LikeStorage likeStorage;
+    private final LikeService likeService;
 
     public void addLikeToFilm(Film film, User user) {
         likeStorage.addLike(film.getId(), user.getId());
@@ -56,5 +58,15 @@ public class FilmService {
 
     public String removeFilm(Film film) {
         return filmStorage.removeFilm(film);
+    }
+
+    public Collection<Film> getCommonFilms(Long userId, Long friendId) {
+        Collection<Film> userFilms = likeService.getLikedFilmsByUserId(userId);
+        Collection<Film> friendFilms = likeService.getLikedFilmsByUserId(friendId);
+
+        return userFilms.stream()
+                .filter(friendFilms::contains)
+                .sorted((f1, f2) -> Integer.compare(f2.getRate(), f1.getRate()))
+                .collect(Collectors.toList());
     }
 }
