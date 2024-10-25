@@ -54,6 +54,7 @@ CREATE TABLE IF NOT EXISTS film_likes (
 );
 
 
+
 insert into mpa (name)
 values ('G');
 insert into mpa (name)
