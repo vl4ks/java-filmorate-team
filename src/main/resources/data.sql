@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS film_likes (
  primary key (film_id, user_id)
 );
 
+
 insert into mpa (name)
 values ('G');
 insert into mpa (name)
