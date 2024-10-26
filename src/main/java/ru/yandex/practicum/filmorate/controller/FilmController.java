@@ -75,11 +75,11 @@ class FilmController {
             @RequestParam(name = "by", required = false, defaultValue = "title") String by) {
          log.info("/films/search?query={}&by={}", query, by);
          if (query.isEmpty()) {
-             throw new DataException("Поле не заполнено. ");
+             throw new DataException("Строка поиска не заполнена. ");
          }
          var searchDir = Arrays.stream(by.split(",")).toList();
          if (!searchDir.contains("title") && !searchDir.contains("director"))  {
-             throw new DataException("Поле не заполнено. ");
+             throw new DataException("Строка поиска не заполнена. ");
          }
          try {
              var result = filmService.searchFilms(query, searchDir);
