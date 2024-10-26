@@ -118,25 +118,29 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Collection<Film> searchFilms(String query, List<String> searchDir) {
-        var sql = "SELECT f.ID, " +
-                " f.NAME, " +
-                " DESCRIPTION, " +
-                " RELEASE_DATE, " +
-                " DURATION, " +
-                " RATE, " +
+        var sql = "select f.id, " +
+                " f.name, " +
+                " description, " +
+                " release_date, " +
+                " duration, " +
+                " rate, " +
                 " m.id as mpa_id, " +
                 " m.name as mpa_name " +
-                " FROM FILMS f " +
-                " JOIN MPA m ON f.MPA_RATING = m.ID ";
-        if (!searchDir.isEmpty()) {
-            sql = sql + " LEFT JOIN FILM_DIRECTORS fd ON fd.FILM_ID = f.id " +
-            " AND f.NAME LIKE ('%name%') ";
+                " from films f " +
+                " join mpa m on f.mpa_rating = m.id ";
+        if (searchDir.contains("director")) {
+            sql = sql + " left join film_directors fd on fd.film_id = f.id " +
+                    " left join directors d on d.director_id = fd.director_id ";
         }
-        sql = sql + " WHERE 1=1 ";
-
-        if (!searchDir.isEmpty()) {
-            sql = sql + " LEFT JOIN DIRECTORS d ON d.director_id = fd.director_id " +
-            " AND d.name LIKE ('%name%') ";
+        sql = sql + " where 1=1 ";
+        if (searchDir.size() == 1) {
+            if (searchDir.contains("title")) {
+                sql = sql + " and f.name like ('%" + query + "%') ";
+            } else if (searchDir.contains("director")) {
+                sql = sql + " and d.name like ('%" + query + "%') ";
+            }
+        } else  if (searchDir.size() == 2 && searchDir.contains("title") && searchDir.contains("director")) {
+                sql = sql + " and ( f.name like ('%" + query + "%') or d.name like ('%" + query + "%'))";
         }
 
         Collection<Film> films = jdbcTemplate.query(sql, new FilmMapper());
