@@ -116,6 +116,15 @@ public class FilmDbStorage implements FilmStorage {
         return null;
     }
 
+    @Override
+    public Collection<Film> searchFilms(String query, List<String> searchDir) {
+        var sql = "";
+
+
+        Collection<Film> films = jdbcTemplate.query(sql, new FilmMapper());
+        return setFilmGenres(films);
+    }
+
     private Film addFields(Film film) {
         long filmId = film.getId();
         int mpaId = film.getMpa().getId();
