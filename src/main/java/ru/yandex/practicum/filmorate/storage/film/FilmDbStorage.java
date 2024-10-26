@@ -118,8 +118,26 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Collection<Film> searchFilms(String query, List<String> searchDir) {
-        var sql = "";
+        var sql = "SELECT f.ID, " +
+                " f.NAME, " +
+                " DESCRIPTION, " +
+                " RELEASE_DATE, " +
+                " DURATION, " +
+                " RATE, " +
+                " m.id as mpa_id, " +
+                " m.name as mpa_name " +
+                " FROM FILMS f " +
+                " JOIN MPA m ON f.MPA_RATING = m.ID ";
+        if (!searchDir.isEmpty()) {
+            sql = sql + " LEFT JOIN FILM_DIRECTORS fd ON fd.FILM_ID = f.id " +
+            " AND f.NAME LIKE ('%name%') ";
+        }
+        sql = sql + " WHERE 1=1 ";
 
+        if (!searchDir.isEmpty()) {
+            sql = sql + " LEFT JOIN DIRECTORS d ON d.director_id = fd.director_id " +
+            " AND d.name LIKE ('%name%') ";
+        }
 
         Collection<Film> films = jdbcTemplate.query(sql, new FilmMapper());
         return setFilmGenres(films);
