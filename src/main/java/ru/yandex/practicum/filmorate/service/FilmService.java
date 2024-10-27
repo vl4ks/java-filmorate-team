@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
@@ -19,6 +20,7 @@ public class FilmService {
 
     private final FilmStorage filmStorage;
     private final LikeStorage likeStorage;
+    private final LikeService likeService;
 
     public void addLikeToFilm(Film film, User user) {
         likeStorage.addLike(film.getId(), user.getId());
@@ -28,15 +30,6 @@ public class FilmService {
 
     public boolean removeLike(Long filmId, Long userId) {
         return likeStorage.removeLike(filmId, userId);
-    }
-
-    public Collection<Film> getTopFilmsLimited(int limit) {
-        return filmStorage.getAllFilms().stream()
-                .filter(film -> film.getRate() > 0)
-                .filter(film -> film.getLikes().size() > 0)
-                .sorted((f1, f2) -> f2.getRate() - f1.getRate())
-                .limit(limit)
-                .collect(Collectors.toList());
     }
 
     public Collection<Film> getAllFilms() {
@@ -61,5 +54,31 @@ public class FilmService {
 
     public Collection<Film> searchFilms(String query, List<String> searchDir) {
         return filmStorage.searchFilms(query, searchDir);
+    }
+
+    public Collection<Film> getPopularFilmsByGenreAndYear(int count, String genreId, String year) {
+        var result = filmStorage.getPopularFilmsByGenreAndYear(count, genreId, year);
+        return result;
+    }
+
+
+    public Collection<Film> getCommonFilms(Long userId, Long friendId) {
+        Collection<Film> userFilms = likeService.getLikedFilmsByUserId(userId);
+        Collection<Film> friendFilms = likeService.getLikedFilmsByUserId(friendId);
+
+        return userFilms.stream()
+                .filter(friendFilms::contains)
+                .sorted((f1, f2) -> Integer.compare(f2.getRate(), f1.getRate()))
+                .collect(Collectors.toList());
+    }
+
+    public Collection<Film> getDirectorFilms(Integer directorId, String sortBy) {
+        Collection<Film> films = filmStorage.getDirectorFilms(directorId, sortBy);
+
+        if (films.isEmpty()) {
+            throw new NotFoundException(String.format("Фильма с id %s нет", directorId));
+        }
+
+        return films;
     }
 }
