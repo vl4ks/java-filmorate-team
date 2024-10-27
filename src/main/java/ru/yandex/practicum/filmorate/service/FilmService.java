@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
 
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service("filmService")
