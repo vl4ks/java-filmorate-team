@@ -40,6 +40,7 @@ public class UserController {
     public Collection<User> findUserFriends(@PathVariable Long id, @PathVariable Long otherId) {
         return userService.getMutualFriends(userService.getUserById(id), userService.getUserById(otherId));
     }
+
     @GetMapping("{id}/recommendations")
     public Collection<Film> getRecomendations(@PathVariable Long id) {
         return filmService.getRecomendations(id);
