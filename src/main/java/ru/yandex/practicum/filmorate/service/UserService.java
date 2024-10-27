@@ -56,4 +56,5 @@ public class UserService {
     public String removeUser(User user) {
         return userStorage.removeUser(user);
     }
+
 }

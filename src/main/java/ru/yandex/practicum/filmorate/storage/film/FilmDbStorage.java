@@ -207,5 +207,37 @@ public class FilmDbStorage implements FilmStorage {
 
         return films;
     }
+
+    @Override
+    public Collection<Film> getUserRecommendations(Long userId) {
+        String sql = "select l.user_id from film_likes as l " +
+                "where l.film_id in " +
+                "(select film_id from film_likes l1 where user_id = ?) " +
+                "and l.user_id <> ? " +
+                "group by l.user_id " +
+                "order by count(l.film_id) " +
+                "limit 1";
+
+        final List<Long> userIds = jdbcTemplate.query(sql, (rs, rowNum) -> rs.getLong("user_id"), userId, userId);
+
+        if (userIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        long similarUserId = userIds.getFirst();
+
+        String filmsFromUser = "select f.*, m.id as mpa_id, m.name as mpa_name " +
+                "from films as f " +
+                "left join mpa as m on f.mpa_rating = m.id " +
+                "left join film_likes as l on f.id = l.film_id " +
+                "where l.user_id = ?";
+
+        List<Film> userFilms = jdbcTemplate.query(filmsFromUser, new FilmMapper(), userId);
+        List<Film> similarFilms = jdbcTemplate.query(filmsFromUser, new FilmMapper(), similarUserId);
+
+        similarFilms.removeAll(userFilms);
+
+        return setFilmGenres(similarFilms);
+    }
 }
 
