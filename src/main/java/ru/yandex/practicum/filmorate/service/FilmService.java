@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
@@ -67,5 +68,15 @@ public class FilmService {
                 .filter(friendFilms::contains)
                 .sorted((f1, f2) -> Integer.compare(f2.getRate(), f1.getRate()))
                 .collect(Collectors.toList());
+    }
+
+    public Collection<Film> getDirectorFilms(Integer directorId, String sortBy) {
+        Collection<Film> films = filmStorage.getDirectorFilms(directorId, sortBy);
+
+        if (films.isEmpty()) {
+            throw new NotFoundException(String.format("Фильма с id %s нет", directorId));
+        }
+
+        return films;
     }
 }
