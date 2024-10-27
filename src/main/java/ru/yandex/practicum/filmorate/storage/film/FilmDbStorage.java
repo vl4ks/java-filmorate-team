@@ -155,7 +155,7 @@ public class FilmDbStorage implements FilmStorage {
                 "FROM film_directors fd " +
                 "join films f on f.id = fd.film_id " +
                 "join mpa m on f.mpa_rating = m.id " +
-                "where director_id = ? " +
+                "where fd.director_id = ? " +
                 "order by year(f.release_date);";
 
         String likesOrderSql = "select f.*," +
@@ -164,7 +164,7 @@ public class FilmDbStorage implements FilmStorage {
                 "from film_directors fd " +
                 "join films f on f.id = fd.film_id  " +
                 "join mpa m on f.mpa_rating = m.id " +
-                "where director_id = ? " +
+                "where fd.director_id = ? " +
                 "order by likes desc;";
 
         Collection<Film> films = jdbcTemplate.query(
