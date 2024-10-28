@@ -1,6 +1,8 @@
 DROP TABLE IF EXISTS film_likes;
 DROP TABLE IF EXISTS film_genres;
 DROP TABLE IF EXISTS friend_requests;
+DROP TABLE IF EXISTS film_directors;
+DROP TABLE IF EXISTS directors;
 DROP TABLE IF EXISTS genres;
 DROP TABLE IF EXISTS films;
 DROP TABLE IF EXISTS mpa;
