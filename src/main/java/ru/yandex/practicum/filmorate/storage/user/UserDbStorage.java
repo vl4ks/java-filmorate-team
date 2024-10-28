@@ -60,7 +60,6 @@ public class UserDbStorage implements UserStorage {
         } catch (DataAccessException e) {
             throw new DataException("Ошибка при удалении пользователя: " + e.getMessage());
         }
-
         if (result > 0) {
             return "{ \"message\": \"Пользователь удален\"}";
         } else {
