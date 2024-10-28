@@ -10,7 +10,6 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -52,7 +51,7 @@ public class FilmService {
         return filmStorage.removeFilm(film);
     }
 
-    public Collection<Film> searchFilms(String query, List<String> searchDir) {
+    public Collection<Film> searchFilms(String query, Collection<String> searchDir) {
         return filmStorage.searchFilms(query, searchDir);
     }
 

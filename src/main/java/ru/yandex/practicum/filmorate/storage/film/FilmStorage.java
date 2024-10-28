@@ -20,7 +20,7 @@ public interface FilmStorage {
 
     Collection<Film> getDirectorFilms(Integer directorId, String sortBy);
 
-    Collection<Film> searchFilms(String query, List<String> searchDir);
-
     Collection<Film> getUserRecommendations(Long userId);
+
+    Collection<Film> searchFilms(String query, Collection<String> searchDir);
 }
