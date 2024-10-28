@@ -23,4 +23,5 @@ public interface FilmStorage {
     Collection<Film> getUserRecommendations(Long userId);
 
     Collection<Film> searchFilms(String query, Collection<String> searchDir);
+  
 }
