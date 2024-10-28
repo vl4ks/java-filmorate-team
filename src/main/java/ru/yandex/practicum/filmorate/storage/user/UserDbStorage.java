@@ -48,11 +48,23 @@ public class UserDbStorage implements UserStorage {
     @Override
     public String removeUser(User user) {
         final String sql = "delete from users where id = ?";
-        int result = jdbcTemplate.update(sql, user.getId());
+        final String sqlFilms = "delete from film_likes where user_id = ?";
+        final String sqlFriends = "delete from friend_requests where user_id = ?";
+
+        int result;
+
+        try {
+            result = jdbcTemplate.update(sql, user.getId());
+            jdbcTemplate.update(sqlFilms, user.getId());
+            jdbcTemplate.update(sqlFriends, user.getId());
+        } catch (DataAccessException e) {
+            throw new DataException("Ошибка при удалении пользователя: " + e.getMessage());
+        }
+
         if (result > 0) {
-            return "Пользователь удален";
+            return "{ \"message\": \"Пользователь удален\"}";
         } else {
-            return "Пользователь не найден";
+            return "{\"message\": \"Пользователь не найден\"}";
         }
     }
 

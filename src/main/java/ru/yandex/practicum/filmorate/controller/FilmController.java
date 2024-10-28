@@ -17,8 +17,8 @@ import java.util.Collection;
 @RequestMapping("/films")
 class FilmController {
 
-    private FilmService filmService;
-    private UserService userService;
+    private final FilmService filmService;
+    private final UserService userService;
 
     @Autowired
     public FilmController(FilmService filmService, UserService userService) {
@@ -35,7 +35,6 @@ class FilmController {
     public Film findById(@PathVariable Long id) {
         return filmService.getFilmById(id);
     }
-
 
 
     @GetMapping("/popular")
@@ -68,9 +67,14 @@ class FilmController {
         return filmService.getFilmById(id);
     }
 
-    @DeleteMapping
+    @DeleteMapping()
     public String delete(@Valid @RequestBody Film film) {
         return filmService.removeFilm(film);
+    }
+
+    @DeleteMapping("/{id}")
+    public String deleteFilm(@PathVariable Long id) {
+        return filmService.removeFilm(filmService.getFilmById(id));
     }
 
     @DeleteMapping("/{id}/like/{userId}")
@@ -84,21 +88,21 @@ class FilmController {
     public Collection<Film> searchFilms(
             @RequestParam String query,
             @RequestParam(name = "by", required = false, defaultValue = "title") String by) {
-         log.info("/films/search?query={}&by={}", query, by);
-         if (query.isEmpty()) {
-             throw new DataException("Строка поиска не заполнена. ");
-         }
-         var searchDir = Arrays.stream(by.split(",")).toList();
-         if (!searchDir.contains("title") && !searchDir.contains("director"))  {
-             throw new DataException("Строка поиска не заполнена. ");
-         }
-         try {
-             var result = filmService.searchFilms(query, searchDir);
-             return result;
-         } catch (Exception e) {
-             log.error("Ошибка " + e + " поиска. ");
-             throw e;
-         }
+        log.info("/films/search?query={}&by={}", query, by);
+        if (query.isEmpty()) {
+            throw new DataException("Строка поиска не заполнена. ");
+        }
+        var searchDir = Arrays.stream(by.split(",")).toList();
+        if (!searchDir.contains("title") && !searchDir.contains("director")) {
+            throw new DataException("Строка поиска не заполнена. ");
+        }
+        try {
+            var result = filmService.searchFilms(query, searchDir);
+            return result;
+        } catch (Exception e) {
+            log.error("Ошибка " + e + " поиска. ");
+            throw e;
+        }
 
     }
 

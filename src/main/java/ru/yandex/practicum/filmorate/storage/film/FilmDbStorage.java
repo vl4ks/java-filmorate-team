@@ -75,9 +75,9 @@ public class FilmDbStorage implements FilmStorage {
             jdbcTemplate.update(sqlLike, film.getId());
             jdbcTemplate.update(sqlDirector, film.getId());
         } catch (DataAccessException e) {
-            throw new DataException("Что-то пошло не так при удалении фильма" + e.getMessage());
+            throw new NotFoundException("Что-то пошло не так при удалении фильма" + e.getMessage());
         }
-        return "Фильм с ID " + film.getId() + " удален";
+        return "{\"message\": \"Фильм с ID \"" + film.getId() + "\" удален\"}";
     }
 
     @Override
@@ -112,6 +112,9 @@ public class FilmDbStorage implements FilmStorage {
         if (!films.isEmpty()) {
             Collection<Genre> filmGenres = filmGenreStorage.getAllFilmGenresByFilmId(id);
             return films.getFirst().toBuilder().genres(filmGenres).build();
+        }
+        if (films.isEmpty()) {
+            throw new NotFoundException("Фильм с ID \"" + id + "\" не найден");
         }
         return null;
     }
