@@ -52,7 +52,7 @@ public class FilmService {
         return filmStorage.removeFilm(film);
     }
 
-    public Collection<Film> searchFilms(String query, List<String> searchDir) {
+    public Collection<Film> searchFilms(String query, Collection<String> searchDir) {
         return filmStorage.searchFilms(query, searchDir);
     }
 

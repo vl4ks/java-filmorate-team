@@ -181,7 +181,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> searchFilms(String query, List<String> searchDir) {
+    public Collection<Film> searchFilms(String query, Collection<String> searchDir) {
         var sql = "select f.id, " +
                 " f.name, " +
                 " description, " +
