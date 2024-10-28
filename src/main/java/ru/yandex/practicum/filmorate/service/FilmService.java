@@ -80,4 +80,8 @@ public class FilmService {
 
         return films;
     }
+
+    public Collection<Film> getRecomendations(Long userId) {
+        return filmStorage.getUserRecommendations(userId);
+    }
 }
