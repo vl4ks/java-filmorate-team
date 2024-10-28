@@ -127,20 +127,19 @@ public class FilmDbStorage implements FilmStorage {
                 "join (select film_id" +
                 "       , count(user_id) as likes_count " +
                 "       from film_likes " +
-                "       group by film_id ) as popular on popular.film_id = f.id "
-                ;
+                "       group by film_id ) as popular on popular.film_id = f.id ";
         if (!genreId.isEmpty()) {
             sql = sql + " left join film_genres g on g.film_id = f.id ";
         }
         sql = sql + "where 1=1 ";
         if (!genreId.isEmpty()) {
-            sql = sql +  " and g.genre_id = " + Integer.parseInt(genreId);
+            sql = sql + " and g.genre_id = " + Integer.parseInt(genreId);
         }
         if (!year.isEmpty()) {
             sql = sql + " and extract(year from cast(f.release_date as date)) = " + Integer.parseInt(year);
         }
         sql = sql + " order by likes_count desc " +
-                    " limit ?;";
+                " limit ?;";
 
         Collection<Film> films = jdbcTemplate.query(sql, new FilmMapper(), count);
         return setFilmGenres(films);
@@ -202,8 +201,8 @@ public class FilmDbStorage implements FilmStorage {
             } else if (searchDir.contains("director")) {
                 sql = sql + " and d.name like ('%" + query + "%') ";
             }
-        } else  if (searchDir.size() == 2 && searchDir.contains("title") && searchDir.contains("director")) {
-                sql = sql + " and ( f.name like ('%" + query + "%') or d.name like ('%" + query + "%'))";
+        } else if (searchDir.size() == 2 && searchDir.contains("title") && searchDir.contains("director")) {
+            sql = sql + " and ( f.name like ('%" + query + "%') or d.name like ('%" + query + "%'))";
         }
 
         Collection<Film> films = jdbcTemplate.query(sql, new FilmMapper());
