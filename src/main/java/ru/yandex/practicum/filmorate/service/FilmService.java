@@ -56,8 +56,7 @@ public class FilmService {
     }
 
     public Collection<Film> getPopularFilmsByGenreAndYear(int count, String genreId, String year) {
-        var result = filmStorage.getPopularFilmsByGenreAndYear(count, genreId, year);
-        return result;
+        return filmStorage.getPopularFilmsByGenreAndYear(count, genreId, year);
     }
 
 
