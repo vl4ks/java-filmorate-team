@@ -30,11 +30,11 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public Collection<Review> getAll(int filmId, int count) {
-        String sql = "select r.id, r.content, r.film_id, r.user_id, SUM(rl.reaction) as useful from reviews r left join review_likes rl on r.id = rl.review_id";
+        String sql = "select r.id, r.content, r.is_positive, r.film_id, r.user_id, r.useful from reviews r";
 
         if (filmId > 0) {
             sql += " where r.film_id = ?";
-            sql += " group by r.id order by useful limit ?";
+            sql += " order by r.useful limit ?";
             return jdbcTemplate.query(sql, new ReviewMapper(), filmId, count);
         } else {
             sql += " group by r.id order by useful limit ?";
@@ -71,45 +71,61 @@ public class ReviewDbStorage implements ReviewStorage {
             throw new NotFoundException("Не найден фильм с id = " + review.getFilmId());
         }
 
-        final String sql = "insert into reviews (content, user_id, film_id) values (?, ?, ?)";
+        final String sql = "insert into reviews (content, is_positive, user_id, film_id, useful) values (?, ?, ?, ?, ?)";
         KeyHolder generatedKeyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(
-                    sql,
-                    new String[]{"id"}
-            );
+            PreparedStatement preparedStatement = connection.prepareStatement(sql, new String[]{"id"});
             preparedStatement.setString(1, review.getContent());
-            preparedStatement.setInt(2, review.getUserId());
-            preparedStatement.setInt(3, review.getFilmId());
+            preparedStatement.setBoolean(2, !Objects.isNull(review.getIsPositive()) && review.getIsPositive());
+            preparedStatement.setInt(3, review.getUserId());
+            preparedStatement.setInt(4, review.getFilmId());
+            preparedStatement.setInt(5, Objects.isNull(review.getUseful()) ? 0 : review.getUseful());
 
             return preparedStatement;
         }, generatedKeyHolder);
 
         int reviewId = Objects.requireNonNull(generatedKeyHolder.getKey()).intValue();
         review.setReviewId(reviewId);
-        review.setIsPositive(false);
-        review.setUseful(0);
-
-        return review;
+        Optional<Review> ans = this.getById(review.getReviewId());
+        if (ans.isPresent()) {
+            return ans.get();
+        } else {
+            throw new NotFoundException("Не нашли отзыв " + review.getReviewId());
+        }
     }
 
     @Override
     public Review update(Review review) {
+
+        Optional<Review> currentReview = this.getById(review.getReviewId());
+        if (currentReview.isEmpty()) {
+            throw new NotFoundException("Не нашли отзыв " + review.getReviewId());
+        }
+
         User user = userStorage.getUserById((long) review.getUserId());
         Film film = filmStorage.getFilmByFilmId((long) review.getFilmId());
         if (film == null) {
             throw new NotFoundException("Не найден фильм с id = " + review.getFilmId());
         }
 
-        final String sql = "update reviews set content = ?, user_id = ?, film_id = ? where id = ?";
+        final String sql = "update reviews set content = ?, is_positive = ?, user_id = ?, film_id = ?, useful = ? where id = ?";
 
         try {
             if (jdbcTemplate.update(
                     sql,
-                    review.getContent(), review.getUserId(), review.getFilmId(), review.getReviewId()
-            ) > 0) {
-                return review;
+                    review.getContent(),
+                    review.getIsPositive(),
+                    review.getUserId(),
+                    review.getFilmId(),
+                    Objects.isNull(review.getUseful()) ? currentReview.get().getUseful() : review.getUseful(),
+                    review.getReviewId()) > 0) {
+                Optional<Review> ans = this.getById(review.getReviewId());
+                if (ans.isPresent()) {
+                    return ans.get();
+                } else {
+                    throw new NotFoundException("Не нашли отзыв " + review.getReviewId());
+                }
             } else {
                 throw new NotFoundException("Не нашли отзыв " + review.getReviewId());
             }
@@ -119,13 +135,11 @@ public class ReviewDbStorage implements ReviewStorage {
     }
 
     @Override
-    public String remove(Long id) {
+    public void remove(Long id) {
         final String sql = "delete from reviews where id = ?";
         int result = jdbcTemplate.update(sql, id);
-        if (result > 0) {
-            return "Отзыв удален";
-        } else {
-            return "Отзыв не найден";
+        if (result <= 0) {
+            throw new NotFoundException("отзыв id = " + id);
         }
     }
 }
