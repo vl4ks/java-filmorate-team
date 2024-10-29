@@ -113,6 +113,7 @@ public class ReviewLikeDbStorage implements ReviewLikeStorage {
                 }
             } else {
                 review.setUseful(review.getUseful() + reaction);
+                this.removeReaction(reviewId, userId);
                 this.addReaction(reaction, reviewId, userId);
             }
 
