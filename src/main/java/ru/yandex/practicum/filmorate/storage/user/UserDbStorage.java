@@ -95,7 +95,7 @@ public class UserDbStorage implements UserStorage {
         try {
             return jdbcTemplate.queryForObject(USER_SQL.concat(" where id = ?"), new UserMapper(), id);
         } catch (Exception e) {
-            throw new NotFoundException("Не нашли пользователя {}" + id);
+            throw new NotFoundException("Не нашли пользователя с id=" + id);
         }
     }
 

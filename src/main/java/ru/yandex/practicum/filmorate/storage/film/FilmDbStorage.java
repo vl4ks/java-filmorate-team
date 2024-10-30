@@ -127,7 +127,7 @@ public class FilmDbStorage implements FilmStorage {
                 "       , m.name as mpa_name " +
                 "from films f " +
                 "left join mpa m on f.mpa_rating = m.id " +
-                "join (select film_id" +
+                "left join (select film_id" +
                 "       , count(user_id) as likes_count " +
                 "       from film_likes " +
                 "       group by film_id ) as popular on popular.film_id = f.id ";

@@ -33,21 +33,21 @@ public class ErrorHandler {
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(NotFoundException e) {
-        log.error("Не найдено: %s", e.getMessage());
+        log.error(String.format("Не найдено: %s", e.getMessage()));
         return new ErrorResponse(String.format("Не найдено: %s", e.getMessage()));
     }
 
     @ExceptionHandler(NotFoundUserException.class)
     @ResponseStatus(HttpStatus.OK)
     public ErrorResponse handleNotFoundException(NotFoundUserException e) {
-        log.error("Не найдено: %s", e.getMessage());
+        log.error(String.format("Не найдено: %s", e.getMessage()));
         return new ErrorResponse(String.format("Не найдено: %s", e.getMessage()));
     }
 
     @ExceptionHandler(DuplicatedDataException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleDuplicatedDataException(DuplicatedDataException e) {
-        log.error("Обнаружено дублирующееся значение: %s", e.getMessage());
+        log.error(String.format("Не найдено: %s", e.getMessage()));
         return new ErrorResponse(String.format("Обнаружено дублирующееся значение: %s", e.getMessage()));
     }
 
