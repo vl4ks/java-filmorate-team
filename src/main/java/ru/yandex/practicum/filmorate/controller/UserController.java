@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
@@ -19,6 +20,7 @@ public class UserController {
 
     private final UserService userService;
     private final FilmService filmService;
+
 
 
     @GetMapping
@@ -70,4 +72,10 @@ public class UserController {
     public void removeFriend(@PathVariable Long id, @PathVariable Long friendId) {
         userService.removeFriend(userService.getUserById(id), userService.getUserById(friendId));
     }
+
+    @GetMapping("/{id}/feed")
+    public Event getEvent(@PathVariable Long id) {
+        return userService.getEvent(id);
+    }
 }
+

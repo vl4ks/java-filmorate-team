@@ -3,7 +3,9 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.event.EventStorage;
 import ru.yandex.practicum.filmorate.storage.friendRequests.FriendRequestsStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -15,12 +17,14 @@ import java.util.Collection;
 public class UserService {
 
     private final UserStorage userStorage;
+    private final EventStorage eventStorage;
     private final FriendRequestsStorage friendRequestsStorage;
 
     public User createUser(User user) {
         if (user.getName().isEmpty()) {
             user.setName(user.getLogin());
         }
+        eventStorage.eventAddUser(user);
         return userStorage.createUser(user);
     }
 
@@ -50,11 +54,17 @@ public class UserService {
     }
 
     public User updateUser(User user) {
+        eventStorage.eventUpdateUser(user);
         return userStorage.updateUser(user);
     }
 
     public String removeUser(User user) {
+        eventStorage.eventDeleteUser(user);
         return userStorage.removeUser(user);
+    }
+
+    public Event getEvent(Long id) {
+        return eventStorage.getEvents(id);
     }
 
 }

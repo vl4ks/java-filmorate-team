@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.storage.event.EventStorage;
 import ru.yandex.practicum.filmorate.storage.filmGenre.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
 
@@ -17,12 +18,15 @@ public class LikeService {
 
     private final LikeStorage likeStorage;
     private final FilmGenreStorage filmGenreStorage;
+    private final EventStorage eventStorage;
 
     public void addLike(Long filmId, Long userId) {
+        eventStorage.eventAddLike(filmId, userId);
         likeStorage.addLike(filmId, userId);
     }
 
     public void removeLike(Long filmId, Long userId) {
+        eventStorage.eventDeleteLike(filmId, userId);
         likeStorage.removeLike(filmId, userId);
     }
 

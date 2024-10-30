@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.storage.event.EventStorage;
 import ru.yandex.practicum.filmorate.storage.review.ReviewStorage;
 import ru.yandex.practicum.filmorate.storage.reviewLike.ReviewLikeStorage;
 
@@ -18,20 +19,24 @@ public class ReviewService {
 
     private final ReviewStorage reviewStorage;
     private final ReviewLikeStorage reviewLikeStorage;
+    private final EventStorage eventStorage;
 
     public Collection<Review> getAll(int filmId, int count) {
         return reviewStorage.getAll(filmId, count);
     }
 
     public Review create(Review review) {
+        eventStorage.eventAddReview(review);
         return reviewStorage.create(review);
     }
 
     public void remove(Long id) {
+        eventStorage.eventDeleteReview(id);
         reviewStorage.remove(id);
     }
 
     public Review update(Review review) {
+        eventStorage.eventUpdateReview(review);
         return reviewStorage.update(review);
     }
 
