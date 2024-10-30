@@ -119,7 +119,6 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Collection<Film> getPopularFilmsByGenreAndYear(int count, String genreId, String year) {
 
-
         var sql = "select f.* " +
                 "       , m.id as mpa_id " +
                 "       , m.name as mpa_name " +
@@ -128,20 +127,19 @@ public class FilmDbStorage implements FilmStorage {
                 "join (select film_id" +
                 "       , count(user_id) as likes_count " +
                 "       from film_likes " +
-                "       group by film_id ) as popular on popular.film_id = f.id "
-                ;
+                "       group by film_id ) as popular on popular.film_id = f.id ";
         if (!genreId.isEmpty()) {
             sql = sql + " left join film_genres g on g.film_id = f.id ";
         }
         sql = sql + "where 1=1 ";
         if (!genreId.isEmpty()) {
-            sql = sql +  " and g.genre_id = " + Integer.parseInt(genreId);
+            sql = sql + " and g.genre_id = " + Integer.parseInt(genreId);
         }
         if (!year.isEmpty()) {
             sql = sql + " and extract(year from cast(f.release_date as date)) = " + Integer.parseInt(year);
         }
         sql = sql + " order by likes_count desc " +
-                    " limit ?;";
+                " limit ?;";
 
         Collection<Film> films = jdbcTemplate.query(sql, new FilmMapper(), count);
         return setFilmGenres(films);
@@ -180,6 +178,37 @@ public class FilmDbStorage implements FilmStorage {
         return setFilmGenres(films);
     }
 
+    @Override
+    public Collection<Film> searchFilms(String query, Collection<String> searchDir) {
+        var sql = "select f.id, " +
+                " f.name, " +
+                " description, " +
+                " release_date, " +
+                " duration, " +
+                " rate, " +
+                " m.id as mpa_id, " +
+                " m.name as mpa_name " +
+                " from films f " +
+                " join mpa m on f.mpa_rating = m.id ";
+        if (searchDir.contains("director")) {
+            sql = sql + " left join film_directors fd on fd.film_id = f.id " +
+                    " left join directors d on d.director_id = fd.director_id ";
+        }
+        sql = sql + " where 1=1 ";
+        if (searchDir.size() == 1) {
+            if (searchDir.contains("title")) {
+                sql = sql + " and f.name like ('%" + query + "%') ";
+            } else if (searchDir.contains("director")) {
+                sql = sql + " and d.name like ('%" + query + "%') ";
+            }
+        } else if (searchDir.size() == 2 && searchDir.contains("title") && searchDir.contains("director")) {
+            sql = sql + " and ( f.name like ('%" + query + "%') or d.name like ('%" + query + "%'))";
+        }
+
+        Collection<Film> films = jdbcTemplate.query(sql, new FilmMapper());
+        return setFilmGenres(films);
+    }
+
     private Film addFields(Film film) {
         long filmId = film.getId();
         int mpaId = film.getMpa().getId();
@@ -206,6 +235,38 @@ public class FilmDbStorage implements FilmStorage {
         });
 
         return films;
+    }
+
+    @Override
+    public Collection<Film> getUserRecommendations(Long userId) {
+        String sql = "select l.user_id from film_likes as l " +
+                "where l.film_id in " +
+                "(select film_id from film_likes l1 where user_id = ?) " +
+                "and l.user_id <> ? " +
+                "group by l.user_id " +
+                "order by count(l.film_id) " +
+                "limit 1";
+
+        final List<Long> userIds = jdbcTemplate.query(sql, (rs, rowNum) -> rs.getLong("user_id"), userId, userId);
+
+        if (userIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        long similarUserId = userIds.getFirst();
+
+        String filmsFromUser = "select f.*, m.id as mpa_id, m.name as mpa_name " +
+                "from films as f " +
+                "left join mpa as m on f.mpa_rating = m.id " +
+                "left join film_likes as l on f.id = l.film_id " +
+                "where l.user_id = ?";
+
+        List<Film> userFilms = jdbcTemplate.query(filmsFromUser, new FilmMapper(), userId);
+        List<Film> similarFilms = jdbcTemplate.query(filmsFromUser, new FilmMapper(), similarUserId);
+
+        similarFilms.removeAll(userFilms);
+
+        return setFilmGenres(similarFilms);
     }
 }
 

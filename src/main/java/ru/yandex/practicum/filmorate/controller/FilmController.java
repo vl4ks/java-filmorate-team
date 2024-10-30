@@ -4,10 +4,12 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exceptions.DataException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 @Slf4j
@@ -76,6 +78,28 @@ class FilmController {
         filmService.removeLike(filmService.getFilmById(id).getId(), userService.getUserById(userId).getId());
         log.info("Пользователь {} убрал лайк с фильма {}", userId, id);
         return filmService.getFilmById(id);
+    }
+
+    @GetMapping("/search")
+    public Collection<Film> searchFilms(
+            @RequestParam String query,
+            @RequestParam(name = "by", required = false, defaultValue = "title") String by) {
+         log.info("/films/search?query={}&by={}", query, by);
+         if (query.isEmpty()) {
+             throw new DataException("Строка поиска не заполнена. ");
+         }
+         var searchDir = Arrays.stream(by.split(",")).toList();
+         if (!searchDir.contains("title") && !searchDir.contains("director"))  {
+             throw new DataException("Строка поиска не заполнена. ");
+         }
+         try {
+             var result = filmService.searchFilms(query, searchDir);
+             return result;
+         } catch (Exception e) {
+             log.error("Ошибка " + e + " поиска. ");
+             throw e;
+         }
+
     }
 
     @GetMapping("/common")

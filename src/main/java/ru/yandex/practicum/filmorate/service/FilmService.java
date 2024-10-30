@@ -51,6 +51,10 @@ public class FilmService {
         return filmStorage.removeFilm(film);
     }
 
+    public Collection<Film> searchFilms(String query, Collection<String> searchDir) {
+        return filmStorage.searchFilms(query, searchDir);
+    }
+
     public Collection<Film> getPopularFilmsByGenreAndYear(int count, String genreId, String year) {
         var result = filmStorage.getPopularFilmsByGenreAndYear(count, genreId, year);
         return result;
@@ -75,5 +79,9 @@ public class FilmService {
         }
 
         return films;
+    }
+
+    public Collection<Film> getRecomendations(Long userId) {
+        return filmStorage.getUserRecommendations(userId);
     }
 }
