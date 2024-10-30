@@ -4,10 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.model.EventOperation;
+import ru.yandex.practicum.filmorate.model.EventType;
 import ru.yandex.practicum.filmorate.model.Review;
-import ru.yandex.practicum.filmorate.storage.event.EventStorage;
 import ru.yandex.practicum.filmorate.storage.review.ReviewStorage;
-import ru.yandex.practicum.filmorate.storage.reviewLike.ReviewLikeStorage;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -17,26 +17,31 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ReviewService {
 
+    private final EventService eventService;
     private final ReviewStorage reviewStorage;
-    private final ReviewLikeStorage reviewLikeStorage;
-    private final EventStorage eventStorage;
+
 
     public Collection<Review> getAll(int filmId, int count) {
         return reviewStorage.getAll(filmId, count);
     }
 
     public Review create(Review review) {
-        eventStorage.eventAddReview(review);
-        return reviewStorage.create(review);
+        Review reviewToReturn = reviewStorage.create(review);
+        eventService.createEvent(Long.valueOf(reviewToReturn.getUserId()),
+                EventType.REVIEW, EventOperation.ADD, reviewToReturn.getReviewId());
+        return reviewToReturn;
     }
 
     public void remove(Long id) {
-        eventStorage.eventDeleteReview(id);
+        Review review = getById(id);
+        eventService.createEvent(Long.valueOf(review.getUserId()),
+                EventType.REVIEW, EventOperation.REMOVE, review.getReviewId());
         reviewStorage.remove(id);
     }
 
     public Review update(Review review) {
-        eventStorage.eventUpdateReview(review);
+        eventService.createEvent(Long.valueOf(review.getUserId()),
+                EventType.REVIEW, EventOperation.UPDATE, review.getReviewId());
         return reviewStorage.update(review);
     }
 
