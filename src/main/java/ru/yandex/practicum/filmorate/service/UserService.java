@@ -3,6 +3,8 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.model.EventOperation;
+import ru.yandex.practicum.filmorate.model.EventType;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.friendRequests.FriendRequestsStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -15,18 +17,20 @@ import java.util.Collection;
 public class UserService {
 
     private final UserStorage userStorage;
+    private final EventService eventService;
     private final FriendRequestsStorage friendRequestsStorage;
 
     public User createUser(User user) {
         if (user.getName().isEmpty()) {
             user.setName(user.getLogin());
         }
-        return userStorage.createUser(user);
+        User userToReturn = userStorage.createUser(user);
+        return userToReturn;
     }
 
     public void createFriend(Long userId, Long friendId) {
         friendRequestsStorage.addFriend(userId, getUserById(friendId).getId());
-
+        eventService.createEvent(userId, EventType.FRIEND, EventOperation.ADD, friendId);
     }
 
     public Collection<User> getUserFriends(Long userId) {
@@ -35,6 +39,7 @@ public class UserService {
 
     public void removeFriend(User userFrom, User userTo) {
         friendRequestsStorage.deleteFriend(userFrom.getId(), userTo.getId());
+        eventService.createEvent(userFrom.getId(), EventType.FRIEND, EventOperation.REMOVE, userTo.getId());
     }
 
     public Collection<User> getMutualFriends(User userFrom, User userTo) {
