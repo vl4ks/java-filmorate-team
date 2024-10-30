@@ -106,23 +106,16 @@ public class ReviewLikeDbStorage implements ReviewLikeStorage {
             Optional<ReviewLike> reviewLike = this.getReaction(reviewId, userId);
             if (remove) {
                 if (reviewLike.isPresent()) {
-                    review.setUseful(review.getUseful() - reaction);
+                    review.setUseful(review.getUseful() + reaction);
                     this.removeReaction(reviewId, userId);
                 } else {
                     throw new NotFoundException("Реакция от пользователя id = " + userId + " на отзыв id = " + reviewId);
                 }
             } else {
-                review.setUseful(review.getUseful() + reaction);
+                review.setUseful((review.getUseful() + reaction) == 0 ? + reaction : review.getUseful() + reaction);
                 this.removeReaction(reviewId, userId);
                 this.addReaction(reaction, reviewId, userId);
             }
-
-            if (review.getUseful() > 0) {
-                review.setIsPositive(true);
-            } else {
-                review.setIsPositive(false);
-            }
-
             reviewStorage.update(review);
 
             return review;
