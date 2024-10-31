@@ -85,6 +85,7 @@ public class FilmDbStorage implements FilmStorage {
         final String sql = "update films set name = ?, release_date = ?, description = ?, duration = ?, " +
                 "mpa_rating = ?, rate = ? where id = ?";
         filmGenreStorage.deleteAllFilmGenresByFilmId(film.getId());
+        filmDirectorStorage.deleteFilmDirectors(film.getId());
         int result = jdbcTemplate.update(sql,
                 film.getName(),
                 film.getReleaseDate(),
@@ -110,8 +111,8 @@ public class FilmDbStorage implements FilmStorage {
     public Film getFilmByFilmId(Long id) {
         List<Film> films = jdbcTemplate.query(FILMS_MPA_SQL.concat(" where f.id = ?"), new FilmMapper(), id);
         if (!films.isEmpty()) {
-            Collection<Genre> filmGenres = filmGenreStorage.getAllFilmGenresByFilmId(id);
-            return films.getFirst().toBuilder().genres(filmGenres).build();
+            Collection<Film> filmsToReturn = setFilmGenres(films);
+            return filmsToReturn.stream().findFirst().get();
         }
         if (films.isEmpty()) {
             throw new NotFoundException("Фильм с ID " + id + " не найден");
@@ -200,12 +201,12 @@ public class FilmDbStorage implements FilmStorage {
         sql = sql + " where 1=1 ";
         if (searchDir.size() == 1) {
             if (searchDir.contains("title")) {
-                sql = sql + " and f.name like ('%" + query + "%') ";
+                sql = sql + " and lower(f.name) like ('%" + query.toLowerCase() + "%') ";
             } else if (searchDir.contains("director")) {
-                sql = sql + " and d.name like ('%" + query + "%') ";
+                sql = sql + " and lower(d.name) like ('%" + query.toLowerCase() + "%') ";
             }
         } else if (searchDir.size() == 2 && searchDir.contains("title") && searchDir.contains("director")) {
-            sql = sql + " and ( f.name like ('%" + query + "%') or d.name like ('%" + query + "%'))";
+            sql = sql + " and ( lower(f.name) like ('%" + query.toLowerCase() + "%') or lower(d.name) like ('%" + query.toLowerCase() + "%')) order by f.id desc";
         }
 
         Collection<Film> films = jdbcTemplate.query(sql, new FilmMapper());

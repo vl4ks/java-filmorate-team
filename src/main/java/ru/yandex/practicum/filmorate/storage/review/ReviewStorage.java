@@ -15,4 +15,8 @@ public interface ReviewStorage {
     Review update(Review review);
 
     Optional<Review> getById(Long id);
+
+    Collection<Review> getByUserIdAndFilmId(Long filmId, Long userId);
+
+    Review updateAllFields(Review review);
 }

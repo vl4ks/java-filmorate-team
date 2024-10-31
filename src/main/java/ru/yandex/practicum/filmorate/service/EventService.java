@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
@@ -14,6 +15,7 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import java.util.Collection;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EventService {
@@ -35,6 +37,7 @@ public class EventService {
                 .operation(eventOperation)
                 .entityId(entityId)
                 .build();
+        log.trace("createEvent: {}", event);
         try {
             eventStorage.createEvent(event);
         } catch (DataAccessException e) {

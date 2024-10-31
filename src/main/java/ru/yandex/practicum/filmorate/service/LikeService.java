@@ -1,6 +1,8 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.EventOperation;
 import ru.yandex.practicum.filmorate.model.EventType;
@@ -18,6 +20,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class LikeService {
 
+    private static final Logger log = LoggerFactory.getLogger(LikeService.class);
     private final LikeStorage likeStorage;
     private final FilmGenreStorage filmGenreStorage;
     private final EventStorage eventStorage;
@@ -25,13 +28,18 @@ public class LikeService {
     private final EventService eventService;
 
     public void addLike(Long filmId, Long userId) {
-        eventService.createEvent(userId, EventType.LIKE, EventOperation.ADD, filmId);
+        log.info("Добавляем лайк фильму {}, от пользователя {}", filmId, userId);
         likeStorage.addLike(filmId, userId);
+        eventService.createEvent(userId, EventType.LIKE, EventOperation.ADD, filmId);
+        log.info("Лайк фильму {}, от пользователя {} добавлен", filmId, userId);
+
     }
 
     public void removeLike(Long filmId, Long userId) {
-        eventService.createEvent(userId, EventType.LIKE, EventOperation.REMOVE, filmId);
+        log.info("Удаляем лайк фильму {}, от пользователя {}", filmId, userId);
         likeStorage.removeLike(filmId, userId);
+        eventService.createEvent(userId, EventType.LIKE, EventOperation.REMOVE, filmId);
+        log.info("Лайк фильму {}, от пользователя {} удален", filmId, userId);
     }
 
     public Collection<Film> getLikedFilmsByUserId(Long userId) {

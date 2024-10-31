@@ -64,6 +64,7 @@ class FilmController {
     @PutMapping("/{id}/like/{userId}")
     public Film likeFilm(@PathVariable Long id, @PathVariable Long userId) {
         filmService.addLikeToFilm(filmService.getFilmById(id), userService.getUserById(userId));
+        log.info("Пользователь {} поставил лайк фильму {}.", userId, id);
         return filmService.getFilmById(id);
     }
 
@@ -92,7 +93,7 @@ class FilmController {
         if (query.isEmpty()) {
             throw new DataException("Строка поиска не заполнена. ");
         }
-        var searchDir = Arrays.stream(by.split(",")).toList();
+        var searchDir = Arrays.stream(by.split(",")).map((s) -> s.trim().toLowerCase()).toList();
         if (!searchDir.contains("title") && !searchDir.contains("director")) {
             throw new DataException("Строка поиска не заполнена. ");
         }

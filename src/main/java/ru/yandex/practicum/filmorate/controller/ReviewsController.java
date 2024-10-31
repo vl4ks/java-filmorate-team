@@ -24,9 +24,9 @@ public class ReviewsController {
         return reviewsService.getAll(filmId, count);
     }
 
-    @GetMapping("/{id}")
-    public Review getById(@PathVariable Long id) {
-        return reviewsService.getById(id);
+    @GetMapping("/{reviewId}")
+    public Review getById(@PathVariable Long reviewId) {
+        return reviewsService.getById(reviewId);
     }
 
     @PostMapping

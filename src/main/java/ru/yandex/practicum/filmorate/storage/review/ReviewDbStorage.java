@@ -15,10 +15,7 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.sql.PreparedStatement;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Component
 @RequiredArgsConstructor
@@ -34,10 +31,10 @@ public class ReviewDbStorage implements ReviewStorage {
 
         if (filmId > 0) {
             sql += " where r.film_id = ?";
-            sql += " order by r.useful limit ?";
+            sql += " order by r.useful desc limit ?";
             return jdbcTemplate.query(sql, new ReviewMapper(), filmId, count);
         } else {
-            sql += " group by r.id order by useful limit ?";
+            sql += " group by r.id order by useful desc limit ?";
             return jdbcTemplate.query(sql, new ReviewMapper(), count);
         }
     }
@@ -51,6 +48,16 @@ public class ReviewDbStorage implements ReviewStorage {
         }
 
         return Optional.ofNullable(reviewList.getFirst());
+    }
+
+    @Override
+    public Collection<Review> getByUserIdAndFilmId(Long filmId, Long userId) {
+        final String sql = "SELECT * FROM reviews where film_id = ? and user_id = ?";
+        Collection<Review> reviewList = jdbcTemplate.query(sql, new ReviewMapper(), filmId, userId);
+        if (reviewList.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return reviewList;
     }
 
     private boolean isReviewExist(int userId, int filmId) {
@@ -102,7 +109,6 @@ public class ReviewDbStorage implements ReviewStorage {
         if (currentReview.isEmpty()) {
             throw new NotFoundException("Не нашли отзыв " + review.getReviewId());
         }
-
         User user = userStorage.getUserById((long) review.getUserId());
         Film film = filmStorage.getFilmByFilmId((long) review.getFilmId());
         if (film == null) {
@@ -116,11 +122,11 @@ public class ReviewDbStorage implements ReviewStorage {
                     sql,
                     review.getContent(),
                     review.getIsPositive(),
-                    review.getUserId(),
-                    review.getFilmId(),
-                    Objects.isNull(review.getUseful()) ? currentReview.get().getUseful() : review.getUseful(),
-                    review.getReviewId()) > 0) {
-                Optional<Review> ans = this.getById(review.getReviewId());
+                    currentReview.get().getUserId(),
+                    currentReview.get().getFilmId(),
+                    Objects.isNull(review.getUseful()) ? currentReview.get().getUseful() : 0,
+                    currentReview.get().getReviewId()) > 0) {
+                Optional<Review> ans = this.getById(currentReview.get().getReviewId());
                 if (ans.isPresent()) {
                     return ans.get();
                 } else {
@@ -132,6 +138,26 @@ public class ReviewDbStorage implements ReviewStorage {
         } catch (DataAccessException e) {
             throw new DataException("Ошибка при обновлении отзыва");
         }
+    }
+
+    @Override
+    public Review updateAllFields(Review review) {
+        final String sql = "update reviews " +
+                "set content = ?, is_positive = ?, user_id = ?, film_id = ?, useful = ? where id = ?";
+        try {
+            jdbcTemplate.update(
+                    sql,
+                    review.getContent(),
+                    review.getIsPositive(),
+                    review.getUserId(),
+                    review.getFilmId(),
+                    review.getUseful(),
+                    review.getReviewId()
+            );
+        } catch (DataAccessException e) {
+            throw new DataException("Ошибка при обновлении отзыва" + e.getMessage());
+        }
+        return getById(review.getReviewId()).get();
     }
 
     @Override

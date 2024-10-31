@@ -26,23 +26,32 @@ public class ReviewService {
     }
 
     public Review create(Review review) {
+        log.info("Запрос CreateReview: {}", review);
         Review reviewToReturn = reviewStorage.create(review);
         eventService.createEvent(Long.valueOf(reviewToReturn.getUserId()),
                 EventType.REVIEW, EventOperation.ADD, reviewToReturn.getReviewId());
+        Review createdReview = reviewStorage.getById(reviewToReturn.getReviewId()).get();
+        log.info("CreatedReview: {}, timestamp {}", reviewToReturn, System.currentTimeMillis());
         return reviewToReturn;
     }
 
     public void remove(Long id) {
+        log.info("Запрос RemoveReview: {}", id);
         Review review = getById(id);
+        log.info("Отзыв на удаление: {}", review);
+        reviewStorage.remove(id);
         eventService.createEvent(Long.valueOf(review.getUserId()),
                 EventType.REVIEW, EventOperation.REMOVE, review.getReviewId());
-        reviewStorage.remove(id);
+
     }
 
     public Review update(Review review) {
-        eventService.createEvent(Long.valueOf(review.getUserId()),
-                EventType.REVIEW, EventOperation.UPDATE, review.getReviewId());
-        return reviewStorage.update(review);
+        log.info("Запрос UpdateReview: {}", review);
+        Review reviewToReturn = reviewStorage.update(review);
+        eventService.createEvent(Long.valueOf(reviewToReturn.getUserId()),
+                EventType.REVIEW, EventOperation.UPDATE, reviewToReturn.getReviewId());
+        log.info("UpdatedReviewReturn: {}", reviewToReturn);
+        return reviewToReturn;
     }
 
     public Review getById(Long id) {

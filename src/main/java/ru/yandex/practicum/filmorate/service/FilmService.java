@@ -28,7 +28,7 @@ public class FilmService {
         likeStorage.addLike(film.getId(), user.getId());
         Film updatedFilm = filmStorage.getFilmByFilmId(film.getId());
         filmStorage.updateFilm(updatedFilm);
-        eventService.createEvent(user.getId(), EventType.LIKE, EventOperation.ADD, film.getId());
+        eventService.createEvent(user.getId(), EventType.LIKE, EventOperation.ADD, updatedFilm.getId());
     }
 
     public boolean removeLike(Long filmId, Long userId) {

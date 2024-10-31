@@ -42,6 +42,7 @@ public class ReviewLikeDbStorage implements ReviewLikeStorage {
         return this.updateReview(reviewId, userId, -1, true);
     }
 
+    @Override
     public Optional<ReviewLike> getReaction(int reviewId, int userId) {
         User user = userStorage.getUserById((long) userId);
         if (reviewStorage.getById((long) reviewId).isEmpty()) {
@@ -112,13 +113,13 @@ public class ReviewLikeDbStorage implements ReviewLikeStorage {
                     throw new NotFoundException("Реакция от пользователя id = " + userId + " на отзыв id = " + reviewId);
                 }
             } else {
-                review.setUseful((review.getUseful() + reaction) == 0 ? + reaction : review.getUseful() + reaction);
+                review.setUseful((review.getUseful() + reaction) == 0 ? +reaction : review.getUseful() + reaction);
                 this.removeReaction(reviewId, userId);
                 this.addReaction(reaction, reviewId, userId);
             }
-            reviewStorage.update(review);
+            Review toReturn = reviewStorage.updateAllFields(review);
 
-            return review;
+            return toReturn;
         }
     }
 }
