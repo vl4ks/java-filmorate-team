@@ -75,9 +75,9 @@ public class FilmDbStorage implements FilmStorage {
             jdbcTemplate.update(sqlLike, film.getId());
             jdbcTemplate.update(sqlDirector, film.getId());
         } catch (DataAccessException e) {
-            throw new DataException("Что-то пошло не так при удалении фильма" + e.getMessage());
+            throw new NotFoundException("Что-то пошло не так при удалении фильма" + e.getMessage());
         }
-        return "Фильм с ID " + film.getId() + " удален";
+        return "{\"message\": \"Фильм с ID " + film.getId() + " удален\"}";
     }
 
     @Override
@@ -113,6 +113,9 @@ public class FilmDbStorage implements FilmStorage {
             Collection<Genre> filmGenres = filmGenreStorage.getAllFilmGenresByFilmId(id);
             return films.getFirst().toBuilder().genres(filmGenres).build();
         }
+        if (films.isEmpty()) {
+            throw new NotFoundException("Фильм с ID " + id + " не найден");
+        }
         return null;
     }
 
@@ -124,7 +127,7 @@ public class FilmDbStorage implements FilmStorage {
                 "       , m.name as mpa_name " +
                 "from films f " +
                 "left join mpa m on f.mpa_rating = m.id " +
-                "join (select film_id" +
+                "left join (select film_id" +
                 "       , count(user_id) as likes_count " +
                 "       from film_likes " +
                 "       group by film_id ) as popular on popular.film_id = f.id ";
