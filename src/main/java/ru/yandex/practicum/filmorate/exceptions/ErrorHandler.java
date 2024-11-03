@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.exceptions;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -32,21 +33,21 @@ public class ErrorHandler {
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(NotFoundException e) {
-        log.error("Не найдено: %s", e.getMessage());
+        log.error(String.format("Не найдено: %s", e.getMessage()));
         return new ErrorResponse(String.format("Не найдено: %s", e.getMessage()));
     }
 
     @ExceptionHandler(NotFoundUserException.class)
     @ResponseStatus(HttpStatus.OK)
     public ErrorResponse handleNotFoundException(NotFoundUserException e) {
-        log.error("Не найдено: %s", e.getMessage());
+        log.error(String.format("Не найдено: %s", e.getMessage()));
         return new ErrorResponse(String.format("Не найдено: %s", e.getMessage()));
     }
 
     @ExceptionHandler(DuplicatedDataException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleDuplicatedDataException(DuplicatedDataException e) {
-        log.error("Обнаружено дублирующееся значение: %s", e.getMessage());
+        log.error(String.format("Не найдено: %s", e.getMessage()));
         return new ErrorResponse(String.format("Обнаружено дублирующееся значение: %s", e.getMessage()));
     }
 
@@ -66,5 +67,11 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleException(Exception e) {
         return new ErrorResponse(String.format("Ошибка сервера: %s", e.getMessage()));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleException(HttpMessageNotReadableException e) {
+        return new ErrorResponse(String.format("Ошибка сервера: %s", e.getLocalizedMessage()));
     }
 }

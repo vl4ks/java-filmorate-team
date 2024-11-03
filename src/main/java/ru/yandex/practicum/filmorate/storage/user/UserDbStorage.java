@@ -48,11 +48,22 @@ public class UserDbStorage implements UserStorage {
     @Override
     public String removeUser(User user) {
         final String sql = "delete from users where id = ?";
-        int result = jdbcTemplate.update(sql, user.getId());
+        final String sqlFilms = "delete from film_likes where user_id = ?";
+        final String sqlFriends = "delete from friend_requests where user_id = ?";
+
+        int result;
+
+        try {
+            result = jdbcTemplate.update(sql, user.getId());
+            jdbcTemplate.update(sqlFilms, user.getId());
+            jdbcTemplate.update(sqlFriends, user.getId());
+        } catch (DataAccessException e) {
+            throw new DataException("Ошибка при удалении пользователя: " + e.getMessage());
+        }
         if (result > 0) {
-            return "Пользователь удален";
+            return "{ \"message\": \"Пользователь удален\"}";
         } else {
-            return "Пользователь не найден";
+            return "{\"message\": \"Пользователь не найден\"}";
         }
     }
 
@@ -84,7 +95,7 @@ public class UserDbStorage implements UserStorage {
         try {
             return jdbcTemplate.queryForObject(USER_SQL.concat(" where id = ?"), new UserMapper(), id);
         } catch (Exception e) {
-            throw new NotFoundException("Не нашли пользователя {}" + id);
+            throw new NotFoundException("Не нашли пользователя с id=" + id);
         }
     }
 
@@ -102,11 +113,5 @@ public class UserDbStorage implements UserStorage {
         final String sql = "select * from users where id in" +
                 " (select fr.friend_id from users u join friend_requests fr on u.id = fr.user_id where u.id = ?)";
         return jdbcTemplate.query(sql, new UserMapper(), userId);
-    }
-
-    @Override
-    public boolean deleteUserById(Long id) {
-        final String sql = "delete from users where id = ?";
-        return jdbcTemplate.update(sql, id) > 0;
     }
 }
